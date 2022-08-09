@@ -9,15 +9,15 @@ provider "azurerm" {
 
 data "azurerm_client_config" "current" {}
 
-resource "azurerm_resource_group" "test" {
+resource "azurerm_resource_group" "ODL-azure-709618" {
   name     = "${var.prefix}-resources"
-  location = var.location
+  location = "East US"
 }
 
 resource "azurerm_key_vault" "test" {
   name                        = "${var.prefix}kv"
-  location                    = azurerm_resource_group.test.location
-  resource_group_name         = azurerm_resource_group.test.name
+  location                    = azurerm_resource_group.ODL-azure-709618.location
+  resource_group_name         = azurerm_resource_group.ODL-azure-709618.name
   tenant_id                   = data.azurerm_client_config.current.tenant_id
   sku_name                    = "premium"
   enabled_for_disk_encryption = true
@@ -27,7 +27,7 @@ resource "azurerm_key_vault" "test" {
 resource "azurerm_key_vault_access_policy" "service-principal" {
   key_vault_id = azurerm_key_vault.test.id
   tenant_id    = data.azurerm_client_config.current.tenant_id
-  object_id    = data.azurerm_client_config.current.object_id
+  object_id    = data.azurerm_client_config.current.object_id  
 
   key_permissions = [
     "Create",
@@ -66,21 +66,21 @@ resource "azurerm_key_vault_key" "test" {
 resource "azurerm_virtual_network" "test" {
   name                = "${var.prefix}-network"
   address_space       = ["10.0.0.0/16"]
-  location            = azurerm_resource_group.test.location
-  resource_group_name = azurerm_resource_group.test.name
+  location            = azurerm_resource_group.ODL-azure-709618.location
+  resource_group_name = azurerm_resource_group.ODL-azure-709618.name
 }
 
 resource "azurerm_subnet" "test" {
   name                 = "internal"
-  resource_group_name  = azurerm_resource_group.test.name
+  resource_group_name  = azurerm_resource_group.ODL-azure-709618.name
   virtual_network_name = azurerm_virtual_network.test.name
   address_prefixes     = ["10.0.2.0/24"]
 }
 
 resource "azurerm_network_interface" "test" {
   name                = "${var.prefix}-nic"
-  resource_group_name = azurerm_resource_group.test.name
-  location            = azurerm_resource_group.test.location
+  resource_group_name = azurerm_resource_group.ODL-azure-709618.name
+  location            = azurerm_resource_group.ODL-azure-709618.location
 
   ip_configuration {
     name                          = "internal"
@@ -91,8 +91,8 @@ resource "azurerm_network_interface" "test" {
 
 resource "azurerm_windows_virtual_machine" "test" {
   name                            = "${var.prefix}-vm"
-  resource_group_name             = azurerm_resource_group.test.name
-  location                        = azurerm_resource_group.test.location
+  resource_group_name             = azurerm_resource_group.ODL-azure-709618.name
+  location                        = azurerm_resource_group.ODL-azure-709618.location
   size                            = "Standard_F2"
   admin_username                  = "adminuser"
   admin_password                  = "P@ssw0rd1234!"
